@@ -24,7 +24,7 @@ import {
   Search,
   CheckCircle2
 } from "lucide-react";
-import { checkIpReputation } from "../utils/network";
+import { checkIpReputation, detectClientPublicIp } from "../utils/network";
 import { IpReputationResult } from "../types";
 
 interface DashboardProps {
@@ -55,18 +55,11 @@ export default function Dashboard({
       let ipToScan = targetIp;
 
       // If we are auto-detecting (no specific target IP manually queried),
-      // we try to get the real client-side public IP of the browser first.
+      // we try to get the real client-side public IP of the browser first using multiple APIs.
       if (!ipToScan) {
-        try {
-          const ipifyRes = await fetch("https://api64.ipify.org?format=json");
-          if (ipifyRes.ok) {
-            const ipifyData = await ipifyRes.json();
-            if (ipifyData && ipifyData.ip) {
-              ipToScan = ipifyData.ip;
-            }
-          }
-        } catch (ipifyErr) {
-          console.warn("Falha ao obter IP via ipify client-side, usando detecção padrão do backend:", ipifyErr);
+        const detectedIp = await detectClientPublicIp();
+        if (detectedIp) {
+          ipToScan = detectedIp;
         }
       }
 

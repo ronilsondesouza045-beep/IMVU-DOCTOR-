@@ -300,3 +300,64 @@ export async function checkIpReputation(userIp?: string): Promise<IpReputationRe
   }
 }
 
+/**
+ * Detecta o IP público real do cliente de forma extremamente robusta.
+ * Tenta múltiplos serviços públicos para garantir sucesso em qualquer dispositivo, celular, computador ou estado do Brasil.
+ */
+export async function detectClientPublicIp(): Promise<string | null> {
+  // 1. Tentar ipwho.is primeiro
+  try {
+    const res = await fetch("https://ipwho.is/");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ip) {
+        return data.ip;
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao obter IP via ipwho.is, tentando ipify...", e);
+  }
+
+  // 2. Tentar ipify
+  try {
+    const res = await fetch("https://api64.ipify.org?format=json");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ip) {
+        return data.ip;
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao obter IP via ipify, tentando ipapi.co...", e);
+  }
+
+  // 3. Tentar ipapi.co
+  try {
+    const res = await fetch("https://ipapi.co/json/");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ip) {
+        return data.ip;
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao obter IP via ipapi.co, tentando icanhazip...", e);
+  }
+
+  // 4. Tentar icanhazip (retorna texto puro com quebra de linha)
+  try {
+    const res = await fetch("https://icanhazip.com");
+    if (res.ok) {
+      const text = await res.text();
+      const ip = text.trim();
+      if (ip) {
+        return ip;
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao obter IP via icanhazip...", e);
+  }
+
+  return null;
+}
+

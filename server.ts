@@ -80,8 +80,24 @@ app.post("/api/ip-reputation", async (req, res) => {
       clientIp = clientIp.replace("::ffff:", "");
     }
     
-    // Fallback if IP is localhost
-    if (!clientIp || clientIp === "::1" || clientIp === "127.0.0.1") {
+    // Helper to check if IP is in private address ranges (local networks)
+    const isPrivateIp = (ip: string) => {
+      if (!ip) return true;
+      if (ip === "::1" || ip === "127.0.0.1" || ip === "localhost") return true;
+      if (ip.startsWith("10.")) return true;
+      if (ip.startsWith("192.168.")) return true;
+      if (ip.startsWith("172.")) {
+        const parts = ip.split(".");
+        if (parts.length >= 2) {
+          const second = parseInt(parts[1], 10);
+          return !isNaN(second) && second >= 16 && second <= 31;
+        }
+      }
+      return false;
+    };
+    
+    // Fallback if IP is localhost or private range
+    if (!clientIp || isPrivateIp(clientIp)) {
       clientIp = "186.205.125.10"; // Default sample Brazilian IP for demonstration
     }
 
