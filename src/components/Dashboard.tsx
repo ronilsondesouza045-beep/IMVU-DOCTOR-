@@ -305,68 +305,37 @@ export default function Dashboard({
                   </p>
 
                   <div className="space-y-3 pt-1">
-                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs">1. Como configurar o WARP corretamente:</h5>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-2 border-l border-indigo-500">
-                      No aplicativo do <strong>WARP (1.1.1.1)</strong>, clique no menu de três linhas no canto superior e garanta que a opção selecionada seja <strong>"1.1.1.1 com WARP"</strong> e NÃO "Apenas 1.1.1.1". A opção "Apenas 1.1.1.1" muda apenas o DNS (o que ajuda no login), mas não cria o túnel seguro completo necessário para manter a conexão ativa nas salas 3D.
-                    </p>
-
-                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs">2. Outras VPNs Gratuitas mais robustas para Jogos (Sockets/UDP):</h5>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div className="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-lg border border-slate-200/50 dark:border-slate-800/40 flex flex-col justify-between">
-                        <div>
-                          <span className="font-bold text-indigo-500 block">ProtonVPN (Grátis & Sem Limite)</span>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            A melhor alternativa gratuita para jogos. Ela cria um túnel criptografado completo que lida muito melhor com conexões persistentes de portas de chat do IMVU e não possui limite de dados mensal.
-                          </p>
-                        </div>
-                        <div className="flex gap-3 pt-2 mt-2 border-t border-slate-200/40 dark:border-slate-800/40">
-                          <a
-                            href="https://play.google.com/store/apps/details?id=ch.protonvpn.android"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-indigo-500 hover:underline"
-                          >
-                            <span>Android Play Store</span>
-                            <Zap className="w-2.5 h-2.5" />
-                          </a>
-                          <a
-                            href="https://apps.apple.com/app/proton-vpn-fast-secure/id1437005085"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-blue-500 hover:underline"
-                          >
-                            <span>iOS App Store</span>
-                            <Zap className="w-2.5 h-2.5" />
-                          </a>
-                        </div>
+                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center">
+                      🟢 VPN Ativa & Confirmada:
+                    </h5>
+                    <div className="bg-indigo-500/5 dark:bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/25 flex flex-col justify-between space-y-3">
+                      <div>
+                        <span className="font-extrabold text-indigo-600 dark:text-indigo-400 block uppercase tracking-wider text-[11px]">
+                          🛡️ WINDSCRIBE VPN (O Único que Funcionou!)
+                        </span>
+                        <p className="text-xs text-slate-650 dark:text-slate-300 mt-1 leading-relaxed">
+                          O seu amigo já está utilizando o aplicativo do <strong>Windscribe VPN</strong> e ele confirmou que conseguiu logar com sucesso! Ele é excelente e oferece até 10GB de tráfego grátis todo mês. Veja abaixo como configurá-lo para que ele também fique <strong>extremamente rápido</strong> e pare de travar ao carregar salas de chat 3D pesadas.
+                        </p>
                       </div>
-                      <div className="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-lg border border-slate-200/50 dark:border-slate-800/40 flex flex-col justify-between">
-                        <div>
-                          <span className="font-bold text-blue-500 block">Windscribe VPN (Grátis 10GB/mês)</span>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            Possui o protocolo <strong>"Stealth" (Furtivo)</strong> em suas configurações. Esse modo mascara a VPN como tráfego comum, impedindo que o firewall do IMVU derrube a conexão nas salas.
-                          </p>
-                        </div>
-                        <div className="flex gap-3 pt-2 mt-2 border-t border-slate-200/40 dark:border-slate-800/40">
-                          <a
-                            href="https://play.google.com/store/apps/details?id=com.windscribe.vpn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-indigo-500 hover:underline"
-                          >
-                            <span>Android Play Store</span>
-                            <Zap className="w-2.5 h-2.5" />
-                          </a>
-                          <a
-                            href="https://apps.apple.com/app/windscribe-vpn/id1129453758"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-blue-500 hover:underline"
-                          >
-                            <span>iOS App Store</span>
-                            <Zap className="w-2.5 h-2.5" />
-                          </a>
-                        </div>
+                      <div className="flex gap-3 pt-2 mt-2 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <a
+                          href="https://play.google.com/store/apps/details?id=com.windscribe.vpn"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1 text-xs font-bold text-indigo-500 hover:underline"
+                        >
+                          <span>Android Play Store</span>
+                          <Zap className="w-3 h-3 animate-pulse" />
+                        </a>
+                        <a
+                          href="https://apps.apple.com/app/windscribe-vpn/id1129453758"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1 text-xs font-bold text-blue-500 hover:underline"
+                        >
+                          <span>iOS App Store</span>
+                          <Zap className="w-3 h-3" />
+                        </a>
                       </div>
                     </div>
 
@@ -384,8 +353,55 @@ export default function Dashboard({
                   </div>
                 </div>
 
+                    {/* NEW: Speed & Latency optimization for heavy 3D rooms */}
+                    <div className="mt-3 p-3.5 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 rounded-xl space-y-4">
+                      <span className="font-extrabold text-amber-700 dark:text-amber-400 block uppercase tracking-wider text-xs flex items-center">
+                        ⚡ OTIMIZAÇÃO: Por que fica lento nas salas e como deixar o Windscribe rápido?
+                      </span>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-amber-500/15 space-y-1.5">
+                          <strong className="text-amber-700 dark:text-amber-400 block font-bold">🐌 Por que ficou tão lento na sala?</strong>
+                          <p className="text-slate-600 dark:text-slate-350 leading-relaxed text-[11px]">
+                            O Windscribe mascara o IP do celular dele, desviando do bloqueio do IMVU. Mas, ao entrar em salas de chat com muitas pessoas, o IMVU precisa baixar <strong>centenas de megabytes (MB)</strong> de roupas, cabelos, animações e móveis 3D de cada avatar. Como a VPN gratuita limita a velocidade de download e o joga para um servidor distante, carregar a sala vira uma eternidade!
+                          </p>
+                        </div>
+
+                        <div className="p-3 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-amber-500/15 space-y-1.5">
+                          <strong className="text-indigo-600 dark:text-indigo-400 block font-bold">🚀 Configuração: Como acelerar o Windscribe 10x</strong>
+                          <p className="text-slate-600 dark:text-slate-350 leading-relaxed text-[11px]">
+                            Faça estes ajustes no aplicativo do Windscribe dele para aumentar a velocidade de carregamento nas salas:
+                          </p>
+                          <ol className="list-decimal pl-4 space-y-1 text-slate-500 dark:text-slate-450 text-[10.5px]">
+                            <li>Abra o app do Windscribe &gt; toque no menu de três linhas &gt; vá em <strong>"Connection"</strong> (Conexão).</li>
+                            <li>Toque em <strong>"Connection Mode"</strong> (Modo de Conexão), mude de Automático para <strong>Manual</strong>.</li>
+                            <li>Nas opções que aparecerem, selecione o protocolo <strong>"WireGuard"</strong>. Ele é o protocolo leve de alta performance mais rápido que existe para jogos.</li>
+                          </ol>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 bg-indigo-500/10 dark:bg-indigo-500/25 rounded-xl border border-indigo-500/20 space-y-3">
+                        <span className="font-extrabold text-indigo-700 dark:text-indigo-400 block uppercase tracking-wider text-[11px]">
+                          🚀 A SOLUÇÃO DEFINITIVA (VELOCIDADE MÁXIMA DE 100% - SEM PRECISAR DE NENHUMA VPN):
+                        </span>
+                        
+                        <div className="space-y-3 text-xs text-slate-650 dark:text-slate-300">
+                          <div className="pl-3 border-l-2 border-indigo-500 space-y-1">
+                            <strong className="text-indigo-700 dark:text-indigo-400 block font-bold">Configurar o DNS Privado Nativo no Celular</strong>
+                            <p className="text-[11px] leading-relaxed">
+                              Esta é a melhor opção disparada! Ela elimina a necessidade de usar o Windscribe ou qualquer app de VPN. Ela muda apenas a forma como o celular dele busca os servidores do IMVU diretamente pelo Android, contornando o bloqueio e jogando com <strong>100% da velocidade da internet dele (Wi-Fi de fibra ou 4G/5G)</strong>, fazendo com que as salas e pessoas carreguem na hora:
+                            </p>
+                            <p className="text-[10.5px] font-mono bg-white/50 dark:bg-slate-950/50 p-2 rounded border border-indigo-500/10 mt-1">
+                              No celular dele: Vá em Configurações &gt; Rede e Internet &gt; Avançado &gt; <strong>DNS Privado</strong> &gt; Selecione "Nome do host do provedor de DNS privado" e digite: <br />
+                              <strong className="text-indigo-600 dark:text-indigo-400">1dot1dot1dot1.cloudflare-dns.com</strong> (ou <strong className="text-indigo-600 dark:text-indigo-400">dns.google</strong>) e salve.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                 <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-xs">
-                  <p className="font-bold text-indigo-600 dark:text-indigo-400">💡 O que ele pode fazer para tentar resolver de vez sem precisar do WARP?</p>
+                  <p className="font-bold text-indigo-600 dark:text-indigo-400">💡 O que ele pode fazer para tentar resolver de vez sem precisar de VPN?</p>
                   <ol className="list-decimal pl-4 mt-1.5 space-y-1 text-slate-600 dark:text-slate-400 text-[11px]">
                     <li><strong>Desativar DNS Privado:</strong> Vá em Ajustes do celular &gt; Rede e Internet &gt; DNS Privado &gt; Mude de automático/manual para <strong>Desativado</strong>.</li>
                     <li><strong>Atualizar o Android System WebView:</strong> Procure por "Android System WebView" na Google Play Store e clique em Atualizar se houver atualização disponível.</li>
@@ -405,13 +421,13 @@ export default function Dashboard({
                   {/* Step 1 */}
                   <div className="bg-white/50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/40 space-y-2">
                     <span className="inline-block px-2 py-0.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full text-[10px] font-bold">PASSO 1</span>
-                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Instalar o app Cloudflare 1.1.1.1 (WARP)</h5>
+                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Instalar e Configurar o Windscribe VPN</h5>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      O <strong>1.1.1.1 com WARP</strong> é um aplicativo oficial e gratuito na Google Play Store (Android) e App Store (iOS). Ele reconstrói a rota de rede inteira do seu celular por túneis seguros da Cloudflare, desviando de bloqueios do provedor em um único clique sem deixar a internet lenta.
+                      O <strong>Windscribe VPN</strong> foi o aplicativo confirmado que funcionou para o celular do seu amigo. Garanta que ele esteja ativo para conseguir logar no IMVU, e mude o protocolo nas configurações do aplicativo de Automático para Manual escolhendo <strong>WireGuard</strong> para máxima performance nas salas 3D.
                     </p>
                     <div className="flex gap-3 pt-1">
                       <a
-                        href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone"
+                        href="https://play.google.com/store/apps/details?id=com.windscribe.vpn"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center space-x-1 text-[11px] font-bold text-indigo-500 hover:underline"
@@ -420,7 +436,7 @@ export default function Dashboard({
                         <Zap className="w-3 h-3" />
                       </a>
                       <a
-                        href="https://apps.apple.com/app/1-1-1-1-faster-internet/id1423538605"
+                        href="https://apps.apple.com/app/windscribe-vpn/id1129453758"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center space-x-1 text-[11px] font-bold text-blue-500 hover:underline"
@@ -468,7 +484,7 @@ export default function Dashboard({
                 </div>
 
                 <div className="text-center bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/20 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                  💡 Recomendação de Ouro: No celular, instalar o aplicativo <strong>WARP (1.1.1.1)</strong> da Cloudflare resolve instantaneamente 99% desses erros do IMVU sem precisar configurar nada manualmente.
+                  💡 Recomendação de Ouro: No celular do seu amigo, usar o <strong>Windscribe VPN</strong> configurado com protocolo <strong>WireGuard</strong> ou ativar o <strong>DNS Privado Nativo</strong> resolvem de vez os erros de conexão e de lentidão no IMVU!
                 </div>
               </div>
             </motion.div>
