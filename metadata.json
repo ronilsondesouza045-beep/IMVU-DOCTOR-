@@ -1,0 +1,6 @@
+{
+  "name": "IMVU Doctor AI Pro",
+  "description": "Diagnóstico profissional de conexão e suporte técnico inteligente com IA para usuários do IMVU.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
