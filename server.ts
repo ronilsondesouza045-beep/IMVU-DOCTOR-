@@ -85,6 +85,14 @@ app.post("/api/ip-reputation", async (req, res) => {
       clientIp = "186.205.125.10"; // Default sample Brazilian IP for demonstration
     }
 
+    // Basic format validation
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$/;
+    
+    if (clientIp !== "186.205.125.10" && !ipv4Regex.test(clientIp) && !ipv6Regex.test(clientIp)) {
+      return res.status(400).json({ success: false, error: "Formato de IP inválido. Certifique-se de usar os pontos separadores (ex: 186.205.125.10)." });
+    }
+
     // 1. Check with ip-api.com for VPN, proxy, hosting, ISP, country
     let ipData: any = {};
     try {
@@ -94,6 +102,10 @@ app.post("/api/ip-reputation", async (req, res) => {
       }
     } catch (e) {
       console.error("Erro ao chamar ip-api.com:", e);
+    }
+
+    if (ipData && ipData.status === "fail") {
+      return res.status(400).json({ success: false, error: `Erro na consulta de IP: ${ipData.message || "IP inválido ou restrito"}` });
     }
 
     // 2. Check DNSBLs (DNS Blacklists) if it's IPv4

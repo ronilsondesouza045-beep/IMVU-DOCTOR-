@@ -52,13 +52,81 @@ export default function Dashboard({
     setIsCheckingIp(true);
     setIpError(null);
     try {
-      const data = await checkIpReputation(targetIp);
-      setIpData(data);
-      if (targetIp) {
+      let ipToScan = targetIp;
+
+      // If we are auto-detecting (no specific target IP manually queried),
+      // we try to get the real client-side public IP of the browser first.
+      if (!ipToScan) {
+        try {
+          const ipifyRes = await fetch("https://api64.ipify.org?format=json");
+          if (ipifyRes.ok) {
+            const ipifyData = await ipifyRes.json();
+            if (ipifyData && ipifyData.ip) {
+              ipToScan = ipifyData.ip;
+            }
+          }
+        } catch (ipifyErr) {
+          console.warn("Falha ao obter IP via ipify client-side, usando detecção padrão do backend:", ipifyErr);
+        }
+      }
+
+      // If they input a target IP manually, validate its format
+      if (ipToScan) {
+        const cleanIp = ipToScan.trim().replace(/\s+/g, "");
+        
+        // 1. Missing dots warning (e.g. 1921681580)
+        if (/^\d{7,15}$/.test(cleanIp)) {
+          setIpError(
+            `⚠️ Formato Inválido! Você digitou "${ipToScan}" sem pontos. Um endereço de IP real precisa de pontos para separar os blocos de números. Por exemplo: 192.168.15.80 ou 186.205.125.10. Digite novamente com os pontos certinhos!`
+          );
+          setIsCheckingIp(false);
+          return;
+        }
+
+        // Basic validation patterns
+        const ipv4Pattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+        const ipv6Pattern = /^([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$/;
+
+        if (!ipv4Pattern.test(cleanIp) && !ipv6Pattern.test(cleanIp)) {
+          setIpError(
+            `❌ Endereço IP inválido! "${ipToScan}" não corresponde a um formato correto de IP (IPv4 ou IPv6). Garanta que digitou todos os pontos e números corretamente.`
+          );
+          setIsCheckingIp(false);
+          return;
+        }
+
+        // 2. Private IP warning (e.g. 192.168.x.x, 10.x.x.x, 127.0.0.1)
+        const isLocal = 
+          cleanIp.startsWith("192.168.") || 
+          cleanIp.startsWith("10.") || 
+          cleanIp.startsWith("127.") ||
+          (cleanIp.startsWith("172.") && (() => {
+            const parts = cleanIp.split(".");
+            const secondPart = parseInt(parts[1], 10);
+            return secondPart >= 16 && secondPart <= 31;
+          })());
+
+        if (isLocal) {
+          setIpError(
+            `🏠 Atenção: "${ipToScan}" é um IP Local (interno da sua casa ou roteador). IPs locais não existem na internet pública, por isso nenhum hacker consegue bloqueá-lo e o IMVU não o vê de fora. Para testar o seu IP público real (da sua operadora), clique no botão "Atualizar Meu IP" acima!`
+          );
+          setIsCheckingIp(false);
+          return;
+        }
+
+        ipToScan = cleanIp;
+      }
+
+      const data = await checkIpReputation(ipToScan);
+      
+      if (!data.success && data.flags && data.flags[0]?.includes("Não foi possível")) {
+        setIpError("Erro ao comunicar com o servidor de validação. Tente novamente em instantes.");
+      } else {
+        setIpData(data);
         setIpInput(data.ip);
       }
     } catch (err: any) {
-      setIpError("Não foi possível carregar a reputação do IP.");
+      setIpError(err.message || "Não foi possível carregar a reputação do IP.");
     } finally {
       setIsCheckingIp(false);
     }

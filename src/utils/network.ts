@@ -116,7 +116,14 @@ export async function checkIpReputation(userIp?: string): Promise<IpReputationRe
     });
 
     if (!response.ok) {
-      throw new Error(`Erro na API de reputação de IP (Status ${response.status})`);
+      let errMsg = `Erro na API de reputação de IP (Status ${response.status})`;
+      try {
+        const errJson = await response.json();
+        if (errJson && errJson.error) {
+          errMsg = errJson.error;
+        }
+      } catch (e) {}
+      throw new Error(errMsg);
     }
 
     return await response.json();
