@@ -15,7 +15,11 @@ import {
   Network,
   Database,
   Chrome,
-  Loader2
+  Loader2,
+  AlertTriangle,
+  Globe,
+  Zap,
+  BookOpen
 } from "lucide-react";
 import { getDeviceInfo } from "../utils/device";
 import { runNetworkDiagnostics } from "../utils/network";
@@ -195,6 +199,50 @@ export default function TechnicalMode({ onCancel }: TechnicalModeProps) {
                 </div>
               )}
             </div>
+
+            {/* Dynamic SOS Route Block Helper (Activates when IMVU tests fail) */}
+            {networkResults && networkResults.tests.some(t => (t.name.includes("IMVU") || t.name.includes("Site Público") || t.name.includes("Servidor de Imagens")) && t.status === "failed") && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl space-y-3"
+              >
+                <div className="flex items-center space-x-2 text-red-600 dark:text-red-400 font-extrabold text-xs uppercase tracking-wider">
+                  <AlertTriangle className="w-5 h-5 animate-bounce" />
+                  <span>ALERTA CRÍTICO: Bloqueio de IP ou Rota Detectado!</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed">
+                  Os testes de conexão direta com os servidores de conteúdo do IMVU <strong>falharam</strong>, mas o servidor local respondeu. Isso prova que o seu provedor de internet (Wi-Fi ou 3G/4G/5G) está com as rotas quebradas para o IMVU ou bloqueou temporariamente os IPs.
+                </p>
+                
+                <div className="bg-white/40 dark:bg-slate-900/60 p-3 rounded-lg border border-red-500/10 space-y-2">
+                  <span className="text-[10px] font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-wide block flex items-center">
+                    <Globe className="w-3.5 h-3.5 mr-1 text-indigo-500" />
+                    Como resolver isso no seu CELULAR agora:
+                  </span>
+                  
+                  <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                    <p>
+                      <strong>1. Instale o Aplicativo WARP 1.1.1.1 (Recomendado):</strong> Ele é oficial da Cloudflare, 100% gratuito e redireciona todo o tráfego do IMVU no seu celular por túneis seguros que pulam os bloqueios do provedor instantaneamente.
+                    </p>
+                    <div className="flex gap-3 pl-2 py-0.5">
+                      <a href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-indigo-500 hover:underline">
+                        • Baixar para Android (Play Store)
+                      </a>
+                      <a href="https://apps.apple.com/app/1-1-1-1-faster-internet/id1423538605" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 hover:underline">
+                        • Baixar para iPhone (iOS Store)
+                      </a>
+                    </div>
+                    <p>
+                      <strong>2. Troque o DNS do Wi-Fi:</strong> Vá nas propriedades da sua conexão Wi-Fi do celular, altere a configuração de IP para "Estático" e adicione o DNS Primário <code>1.1.1.1</code> e Secundário <code>8.8.8.8</code>.
+                    </p>
+                    <p>
+                      <strong>3. Desligue o Wi-Fi e teste nos Dados Móveis:</strong> Se abrir normalmente pelo 3G/4G/5G, o bloqueio está exclusivamente no modem de internet da sua casa. Desligue o roteador da tomada por 5 minutos para renovar o IP público.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
 

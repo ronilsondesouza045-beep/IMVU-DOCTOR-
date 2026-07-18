@@ -18,7 +18,9 @@ import {
   Loader2,
   FileText,
   Printer,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Globe,
+  Zap
 } from "lucide-react";
 import { getDeviceInfo } from "../utils/device";
 import { runNetworkDiagnostics } from "../utils/network";
@@ -421,6 +423,48 @@ export default function DiagnosticsRunner({ onCancel, onCompleted }: Diagnostics
                 "{diagnosticReport.summary}"
               </p>
             </div>
+
+            {/* Dynamic SOS Route Block Helper (Activates when IMVU tests fail inside the runner report) */}
+            {diagnosticReport && diagnosticReport.testResults && diagnosticReport.testResults.tests && diagnosticReport.testResults.tests.some(t => (t.name.includes("IMVU") || t.name.includes("Site Público") || t.name.includes("Servidor de Imagens")) && t.status === "failed") && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl space-y-3"
+              >
+                <div className="flex items-center space-x-2 text-red-600 dark:text-red-400 font-extrabold text-xs uppercase tracking-wider">
+                  <AlertTriangle className="w-5 h-5 animate-pulse" />
+                  <span>SOS Conectividade Celular: Bloqueio de Rota Confirmado!</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed">
+                  Seus testes indicam que a rede local do seu celular (Wi-Fi ou Dados Móveis) não está conseguindo falar diretamente com a infraestrutura do IMVU. Como o restante da sua internet funciona, seu provedor está bloqueando ou envenenando a rota dos servidores do IMVU.
+                </p>
+                
+                <div className="p-3 bg-white/50 dark:bg-slate-950/40 rounded-xl border border-red-500/10 space-y-2 text-xs">
+                  <span className="font-extrabold text-slate-750 dark:text-slate-200 flex items-center">
+                    <Globe className="w-4 h-4 mr-1.5 text-indigo-500" />
+                    Como desbloquear o IMVU no seu celular agora:
+                  </span>
+                  <ul className="space-y-2 pl-1">
+                    <li className="leading-relaxed">
+                      <strong>📱 1. Instalar o Cloudflare WARP (1.1.1.1):</strong> É um app oficial e gratuito na Google Play Store e App Store. Ele cria uma rota otimizada e limpa pelo backbone da Cloudflare que desvia de qualquer restrição ou envenenamento de DNS do seu provedor em um clique.
+                      <div className="flex gap-4 mt-1.5 pl-1">
+                        <a href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-indigo-500 hover:underline inline-flex items-center space-x-1">
+                          <span>Baixar para Android</span>
+                          <Zap className="w-2.5 h-2.5" />
+                        </a>
+                        <a href="https://apps.apple.com/app/1-1-1-1-faster-internet/id1423538605" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 hover:underline inline-flex items-center space-x-1">
+                          <span>Baixar para iPhone</span>
+                          <Zap className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
+                    </li>
+                    <li className="leading-relaxed">
+                      <strong>🌐 2. Mudar para Dados Móveis:</strong> Faça um teste rápido desligando o Wi-Fi do celular e abrindo o IMVU apenas no 4G/5G. Se funcionar, o problema é estritamente no modem ou roteador da sua rede Wi-Fi local. Reinicie o roteador para obter um novo IP público.
+                    </li>
+                  </ul>
+                </div>
+              </motion.div>
+            )}
 
             {/* Diagnostical Hypotheses */}
             <div className="space-y-4">
