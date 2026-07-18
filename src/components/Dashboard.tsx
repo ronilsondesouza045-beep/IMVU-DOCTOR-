@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Activity,
@@ -18,8 +18,14 @@ import {
   ChevronUp,
   BookOpen,
   Smartphone,
-  ShieldCheck
+  ShieldCheck,
+  RefreshCw,
+  AlertTriangle,
+  Search,
+  CheckCircle2
 } from "lucide-react";
+import { checkIpReputation } from "../utils/network";
+import { IpReputationResult } from "../types";
 
 interface DashboardProps {
   onStartDiagnostics: () => void;
@@ -37,6 +43,30 @@ export default function Dashboard({
   savedReportsCount,
 }: DashboardProps) {
   const [isVpnGuideOpen, setIsVpnGuideOpen] = useState(false);
+  const [ipData, setIpData] = useState<IpReputationResult | null>(null);
+  const [isCheckingIp, setIsCheckingIp] = useState(false);
+  const [ipInput, setIpInput] = useState("");
+  const [ipError, setIpError] = useState<string | null>(null);
+
+  const fetchIpReputation = async (targetIp?: string) => {
+    setIsCheckingIp(true);
+    setIpError(null);
+    try {
+      const data = await checkIpReputation(targetIp);
+      setIpData(data);
+      if (targetIp) {
+        setIpInput(data.ip);
+      }
+    } catch (err: any) {
+      setIpError("Não foi possível carregar a reputação do IP.");
+    } finally {
+      setIsCheckingIp(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchIpReputation();
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
@@ -167,6 +197,231 @@ export default function Dashboard({
             </div>
           </div>
         </motion.div>
+      </motion.div>
+
+      {/* IP Reputation & Blacklist Checker Panel */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.6 }}
+        className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-6 shadow-sm space-y-5 relative overflow-hidden"
+        id="ip-reputation-panel"
+      >
+        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/50 dark:border-slate-800/80 pb-4 relative z-10">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center">
+              <Globe className="w-5 h-5 mr-2 text-emerald-500" />
+              Verificador de Reputação de IP e Blacklist
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Monitore se o IP atual (ou de um amigo) foi banido, está em blacklists ou é detectado como VPN/Proxy de risco.
+            </p>
+          </div>
+          <button
+            onClick={() => fetchIpReputation()}
+            disabled={isCheckingIp}
+            className="flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors duration-200 disabled:opacity-50 cursor-pointer shrink-0"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isCheckingIp ? "animate-spin" : ""}`} />
+            <span>Atualizar Meu IP</span>
+          </button>
+        </div>
+
+        {/* Manual Search Bar */}
+        <div className="flex flex-col sm:flex-row gap-2 relative z-10">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Digite um endereço de IP para escanear (ex: 186.205.125.10)..."
+              value={ipInput}
+              onChange={(e) => setIpInput(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-slate-800 dark:text-slate-200"
+            />
+          </div>
+          <button
+            onClick={() => fetchIpReputation(ipInput.trim() || undefined)}
+            disabled={isCheckingIp}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center space-x-1 cursor-pointer shadow-sm shadow-blue-500/10"
+          >
+            {isCheckingIp ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <span>Escanear IP</span>
+            )}
+          </button>
+        </div>
+
+        {/* Content Area */}
+        {ipError && (
+          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs rounded-xl">
+            {ipError}
+          </div>
+        )}
+
+        {isCheckingIp && !ipData && (
+          <div className="py-8 flex flex-col items-center justify-center space-y-2">
+            <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+            <p className="text-xs text-slate-500 dark:text-slate-400">Verificando bases de dados de reputação de IP...</p>
+          </div>
+        )}
+
+        {!isCheckingIp && ipData && (
+          <div className="space-y-4 relative z-10">
+            {/* IP Info Dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Box 1: IP & ISP */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Endereço Analisado</span>
+                <div className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+                  <span>{ipData.ip}</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                    ipData.countryCode === "BR" ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"
+                  }`}>
+                    {ipData.countryCode}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                  <p className="truncate"><strong>ISP:</strong> {ipData.isp}</p>
+                  <p className="truncate"><strong>Local:</strong> {ipData.city}, {ipData.country}</p>
+                </div>
+              </div>
+
+              {/* Box 2: Risk Meter */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pontuação de Risco</span>
+                <div className="flex items-baseline justify-between">
+                  <span className={`text-xl font-extrabold ${
+                    ipData.threatLevel === "critical" ? "text-red-500 animate-pulse" :
+                    ipData.threatLevel === "high" ? "text-orange-500" :
+                    ipData.threatLevel === "medium" ? "text-yellow-500" : "text-emerald-500"
+                  }`}>
+                    {ipData.riskScore}%
+                  </span>
+                  <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                    ipData.threatLevel === "critical" ? "bg-red-500/10 text-red-500" :
+                    ipData.threatLevel === "high" ? "bg-orange-500/10 text-orange-500" :
+                    ipData.threatLevel === "medium" ? "bg-yellow-500/10 text-yellow-500" : "bg-emerald-500/10 text-emerald-500"
+                  }`}>
+                    {ipData.threatLevel === "critical" ? "Crítico" :
+                     ipData.threatLevel === "high" ? "Alto" :
+                     ipData.threatLevel === "medium" ? "Médio" : "Limpo / Baixo"}
+                  </span>
+                </div>
+                {/* Risk Progress Bar */}
+                <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      ipData.threatLevel === "critical" ? "bg-red-500" :
+                      ipData.threatLevel === "high" ? "bg-orange-500" :
+                      ipData.threatLevel === "medium" ? "bg-yellow-500" : "bg-emerald-500"
+                    }`}
+                    style={{ width: `${ipData.riskScore}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Box 3: Proxy & Blacklist Status */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status Geral</span>
+                <div className="text-[11px] space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">VPN / Proxy:</span>
+                    <span className={`font-semibold ${ipData.isProxy ? "text-amber-500" : "text-emerald-500"}`}>
+                      {ipData.isProxy ? "Sim (Ativo)" : "Não Detectado"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Hospedagem/Hosting:</span>
+                    <span className={`font-semibold ${ipData.isHosting ? "text-amber-500" : "text-emerald-500"}`}>
+                      {ipData.isHosting ? "Sim (Data Center)" : "Não (Residencial)"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Blacklists Ativas:</span>
+                    <span className={`font-semibold ${ipData.dnsbl.listedCount > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                      {ipData.dnsbl.listedCount} listada(s)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Blacklist List Details */}
+            <div className="bg-slate-50 dark:bg-slate-950/30 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3.5 space-y-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Varredura de Blacklists de DNS Públicas (DNSBL)</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {ipData.dnsbl.results.map((bl, idx) => (
+                  <div key={idx} className="bg-white/40 dark:bg-slate-900/40 p-2.5 rounded-lg border border-slate-200/40 dark:border-slate-800/40 flex flex-col justify-between">
+                    <div>
+                      <span className="font-bold text-[11px] text-slate-700 dark:text-slate-300 block">{bl.name}</span>
+                      <p className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">{bl.desc}</p>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between border-t border-slate-200/20 dark:border-slate-800/20 pt-1.5">
+                      <span className="text-[9px] text-slate-400 font-mono">{bl.host}</span>
+                      {bl.isListed ? (
+                        <span className="text-[9px] font-bold text-red-500 uppercase px-1.5 py-0.5 bg-red-500/10 rounded">
+                          Bloqueado
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-bold text-emerald-500 uppercase px-1.5 py-0.5 bg-emerald-500/10 rounded">
+                          Limpo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* HIGH RISK WARNING BANNER */}
+            {(ipData.threatLevel === "critical" || ipData.threatLevel === "high" || ipData.dnsbl.listedCount > 0 || ipData.isProxy) && (
+              <motion.div
+                initial={{ scale: 0.98, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="p-4 bg-red-500/10 dark:bg-red-500/15 border border-red-500/20 rounded-xl space-y-3"
+              >
+                <div className="flex items-center space-x-2 text-red-700 dark:text-red-400">
+                  <AlertTriangle className="w-5 h-5 animate-pulse shrink-0" />
+                  <strong className="font-bold text-xs uppercase tracking-wider">⚠️ ALERTA: Alto Risco de Bloqueio ou IP Banido no IMVU</strong>
+                </div>
+                <div className="text-[11px] text-slate-600 dark:text-slate-350 leading-relaxed space-y-2">
+                  <p>
+                    O IP analisado apresenta indícios de risco ou está listado em listas negras públicas de tráfego nocivo. Isso é extremamente comum no Brasil devido ao uso de IPs compartilhados (CGNAT) e modems que não foram reiniciados recentemente.
+                  </p>
+                  <p className="font-bold text-red-700 dark:text-red-400 uppercase tracking-wider text-[10px]">
+                    O que isso causa no IMVU?
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1 text-slate-500 dark:text-slate-400">
+                    <li><strong>Erro de Login (Authenticating...):</strong> O sistema de proteção do IMVU (como Cloudflare) bloqueia a entrada de IPs que constam em blacklists de spam/DDoS para prevenir bots.</li>
+                    <li><strong>Desconexões Constantes:</strong> Seus pacotes de dados de sala 3D são rejeitados ou passam por atraso excessivo porque o servidor está filtrando o tráfego do seu IP.</li>
+                  </ul>
+                  <p className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[10px]">
+                    💡 Como seu amigo limpa esse IP e anula o bloqueio sem usar VPN?
+                  </p>
+                  <p className="pl-3 border-l-2 border-red-500 font-bold text-slate-800 dark:text-slate-200 bg-white/30 dark:bg-slate-900/40 p-2 rounded-lg text-xs leading-relaxed">
+                    Desligue o modem/roteador de Wi-Fi da tomada por 15 minutos inteiros. Isso força o provedor de internet a liberar o IP atual e entregar um novo endereço limpo que não está marcado por nenhum hacker ou blacklist.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* LOW RISK CONGRATS BANNER */}
+            {ipData.threatLevel === "low" && ipData.dnsbl.listedCount === 0 && !ipData.isProxy && (
+              <div className="p-3 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 rounded-xl flex items-start space-x-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <div className="space-y-0.5 text-xs text-slate-600 dark:text-slate-350">
+                  <p className="font-bold text-emerald-700 dark:text-emerald-400">Reputação Excelente de IP!</p>
+                  <p className="text-[11px]">Nenhuma blacklist ativa ou uso de proxy suspeito foi detectado neste IP. Sua rota direta para o IMVU está limpa!</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </motion.div>
 
       {/* Specialty Section: Only connects with VPN / Route Block bypass */}
@@ -396,6 +651,43 @@ export default function Dashboard({
                               <strong className="text-indigo-600 dark:text-indigo-400">1dot1dot1dot1.cloudflare-dns.com</strong> (ou <strong className="text-indigo-600 dark:text-indigo-400">dns.google</strong>) e salve.
                             </p>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* NEW: Hacker Defence & IP Protection Panel */}
+                    <div className="mt-3 p-4 bg-red-500/10 dark:bg-red-500/15 border border-red-500/25 rounded-xl space-y-3">
+                      <span className="font-extrabold text-red-700 dark:text-red-400 block uppercase tracking-wider text-xs flex items-center">
+                        <ShieldAlert className="w-4 h-4 mr-1.5 text-red-500 animate-pulse" />
+                        🛡️ DEFESA DE REDE: "O rapaz bloqueou ou derrubou o IP do meu amigo" - O que fazer?
+                      </span>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-350 leading-relaxed">
+                        Se alguém usou uma ferramenta de hacker para "bloquear" ou "derrubar" o sinal dele, trata-se de um <strong>Ataque DDoS / Flooding</strong> ou uma <strong>lista negra de IP</strong>. O atacante pegou o endereço de IP do Wi-Fi dele (geralmente enviando um link falso de imagem/vídeo para ele clicar, ou através de aplicativos falsificados de moedas) e começou a enviar uma enxurrada de lixo digital para sufocar o modem de internet dele. É por isso que sem a VPN a internet direta dele não consegue abrir o IMVU.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs pt-1">
+                        <div className="p-3 bg-white/50 dark:bg-slate-900/60 rounded-xl border border-red-500/15 space-y-2">
+                          <strong className="text-red-700 dark:text-red-400 block font-bold text-xs">🚀 1. Mudar o IP do Celular e Wi-Fi na Hora (Anular o Hacker):</strong>
+                          <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-350">
+                            Quase todas as operadoras de internet do Brasil (Claro, Vivo, Oi ou provedores locais de fibra) usam <strong>IP Dinâmico</strong>. O hacker só consegue atacar o IP que ele tinha naquele momento. Para trocar de IP e sumir da mira dele:
+                          </p>
+                          <ol className="list-decimal pl-4 text-[10.5px] text-slate-500 dark:text-slate-400 space-y-1">
+                            <li><strong>Desligue o Roteador de Wi-Fi da tomada</strong> por completos <strong>10 a 15 minutos</strong> (não basta apenas desligar e ligar rápido, precisa dar esse tempo para a operadora fechar a conexão dele).</li>
+                            <li>Ao ligar novamente, a central de rede entregará um <strong>endereço IP público totalmente novo e limpo</strong>.</li>
+                            <li><strong>Resultado:</strong> O hacker ficará tentando atacar o IP antigo que já não pertence mais ao seu amigo, e o Wi-Fi dele voltará a funcionar instantaneamente com velocidade máxima e segurança total!</li>
+                          </ol>
+                        </div>
+
+                        <div className="p-3 bg-white/50 dark:bg-slate-900/60 rounded-xl border border-red-500/15 space-y-2">
+                          <strong className="text-red-700 dark:text-red-400 block font-bold text-xs">🔍 2. Varredura Geral de Segurança no Celular:</strong>
+                          <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-350">
+                            Se o seu amigo baixou algum aplicativo modificado para tentar ganhar créditos grátis ou trapaças no IMVU, esse aplicativo pode ser um <strong>Trojan (Cavalo de Troia)</strong> que continua enviando o IP dele ao hacker em segundo plano:
+                          </p>
+                          <ol className="list-decimal pl-4 text-[10.5px] text-slate-500 dark:text-slate-400 space-y-1">
+                            <li><strong>Google Play Protect (Nativo e Grátis):</strong> No celular dele, abra a <code>Google Play Store</code> &gt; toque no ícone do perfil dele no topo &gt; selecione <strong>"Play Protect"</strong> &gt; toque em <strong>"Verificar"</strong>. Isso fará um escaneamento completo no celular buscando malware e ferramentas invasoras ocultas.</li>
+                            <li><strong>Apague Apps Suspeitos:</strong> Exclua imediatamente qualquer app de "Créditos Grátis", "Mod Menu", "IMVU hack" ou VPNs duvidosas não confiáveis.</li>
+                            <li><strong>Proteja as Mensagens:</strong> Diga para ele nunca clicar em links encurtados ou estranhos enviados no chat do IMVU ou Discord por pessoas desconhecidas. Eles usam "IP Loggers" que capturam o endereço do celular no clique.</li>
+                          </ol>
                         </div>
                       </div>
                     </div>

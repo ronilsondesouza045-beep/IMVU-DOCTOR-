@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { NetworkTestResults, NetworkTest } from "../types";
+import { NetworkTestResults, NetworkTest, IpReputationResult } from "../types";
 
 /**
  * Executa testes reais de conexão com servidores locais e remotos.
@@ -100,3 +100,47 @@ export async function runNetworkDiagnostics(
     tests,
   };
 }
+
+/**
+ * Consulta a reputação e blacklist do IP atual do usuário via API backend.
+ * Caso o usuário passe um IP específico, ele consulta esse IP.
+ */
+export async function checkIpReputation(userIp?: string): Promise<IpReputationResult> {
+  try {
+    const response = await fetch("/api/ip-reputation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ip: userIp }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro na API de reputação de IP (Status ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error("Erro ao verificar reputação do IP:", err);
+    // Retorno amigável em caso de falha de conexão local ou indisponibilidade
+    return {
+      success: false,
+      ip: userIp || "Desconhecido",
+      isp: "Erro ao obter ISP",
+      country: "Desconhecido",
+      countryCode: "BR",
+      city: "Desconhecido",
+      isProxy: false,
+      isHosting: false,
+      dnsbl: {
+        results: [],
+        listedCount: 0
+      },
+      riskScore: 0,
+      threatLevel: "low",
+      flags: ["Não foi possível contactar o servidor de verificação de IP."],
+      checkedAt: new Date().toISOString()
+    };
+  }
+}
+

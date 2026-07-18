@@ -70,3 +70,33 @@ export interface DiagnosticReport {
   limitations: string[];
   isFallback?: boolean;
 }
+
+export interface IpReputationResult {
+  success: boolean;
+  ip: string;
+  isp: string;
+  country: string;
+  countryCode: string;
+  city: string;
+  isProxy: boolean;
+  isHosting: boolean;
+  dnsbl: {
+    results: {
+      name: string;
+      host: string;
+      desc: string;
+      isListed: boolean;
+    }[];
+    listedCount: number;
+  };
+  abuseReport?: {
+    abuseConfidenceScore: number;
+    totalReports: number;
+    lastReportedAt: string | null;
+  } | null;
+  riskScore: number;
+  threatLevel: "low" | "medium" | "high" | "critical";
+  flags: string[];
+  checkedAt: string;
+}
+

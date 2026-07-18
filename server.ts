@@ -3,11 +3,34 @@ import path from "path";
 import { GoogleGenAI, Type } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
+import dns from "dns";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
+
+// Helper to check standard IP DNS Blacklists (DNSBLs)
+function checkDNSBL(ip: string, blacklist: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    if (!ipv4Regex.test(ip)) {
+      return resolve(false);
+    }
+    const parts = ip.split(".");
+    const reversedIp = `${parts[3]}.${parts[2]}.${parts[1]}.${parts[0]}`;
+    const query = `${reversedIp}.${blacklist}`;
+    
+    dns.resolve4(query, (err, addresses) => {
+      if (err) {
+        resolve(false);
+      } else {
+        // Any 127.0.0.x return IP indicates presence on list
+        resolve(addresses && addresses.length > 0);
+      }
+    });
+  });
+}
 
 // Increase payload limits for screenshot uploads (base64 images)
 app.use(express.json({ limit: "15mb" }));
@@ -33,6 +56,157 @@ if (apiKey && apiKey !== "MY_GEMINI_API_KEY") {
 // 1. API: Health Check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", aiEnabled: !!ai });
+});
+
+// 1B. API: IP Reputation and Blacklist Verification
+app.post("/api/ip-reputation", async (req, res) => {
+  try {
+    let clientIp = req.body.ip || req.query.ip;
+    
+    if (!clientIp) {
+      // Extract IP from headers
+      const forwarded = req.headers["x-forwarded-for"];
+      if (typeof forwarded === "string") {
+        clientIp = forwarded.split(",")[0].trim();
+      } else if (Array.isArray(forwarded)) {
+        clientIp = forwarded[0].trim();
+      } else {
+        clientIp = req.socket.remoteAddress;
+      }
+    }
+    
+    // Normalize client IP (e.g. remove IPv6 prefix like ::ffff:)
+    if (clientIp && clientIp.startsWith("::ffff:")) {
+      clientIp = clientIp.replace("::ffff:", "");
+    }
+    
+    // Fallback if IP is localhost
+    if (!clientIp || clientIp === "::1" || clientIp === "127.0.0.1") {
+      clientIp = "186.205.125.10"; // Default sample Brazilian IP for demonstration
+    }
+
+    // 1. Check with ip-api.com for VPN, proxy, hosting, ISP, country
+    let ipData: any = {};
+    try {
+      const response = await fetch(`http://ip-api.com/json/${clientIp}?fields=status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,as,query,proxy,hosting`);
+      if (response.ok) {
+        ipData = await response.json();
+      }
+    } catch (e) {
+      console.error("Erro ao chamar ip-api.com:", e);
+    }
+
+    // 2. Check DNSBLs (DNS Blacklists) if it's IPv4
+    const blacklists = [
+      { name: "Spamhaus (Zen)", host: "zen.spamhaus.org", desc: "Banco de dados global de reputação e bloqueio de conexões suspeitas." },
+      { name: "SPFBL DNSBL", host: "dnsbl.spfbl.net", desc: "Lista altamente eficaz para identificar IPs comprometidos, modems invadidos ou ataques no Brasil." },
+      { name: "Barracuda Central", host: "b.barracudacentral.org", desc: "Lista global de reputação de IPs que enviam tráfego nocivo ou tentativas de intrusão." }
+    ];
+
+    const dnsblResults = [];
+    let blacklistedCount = 0;
+
+    for (const bl of blacklists) {
+      const isListed = await checkDNSBL(clientIp, bl.host);
+      if (isListed) {
+        blacklistedCount++;
+      }
+      dnsblResults.push({
+        name: bl.name,
+        host: bl.host,
+        desc: bl.desc,
+        isListed
+      });
+    }
+
+    // 3. Optional AbuseIPDB API Check if API Key exists
+    let abuseIpDbData: any = null;
+    const abuseApiKey = process.env.ABUSEIPDB_API_KEY;
+    if (abuseApiKey && abuseApiKey !== "MY_ABUSEIPDB_API_KEY") {
+      try {
+        const response = await fetch(`https://api.abuseipdb.com/api/v2/check?ipAddress=${clientIp}&maxAgeInDays=90`, {
+          headers: {
+            "Key": abuseApiKey,
+            "Accept": "application/json"
+          }
+        });
+        if (response.ok) {
+          const resJson: any = await response.json();
+          abuseIpDbData = resJson.data;
+        }
+      } catch (e) {
+        console.error("Erro ao consultar AbuseIPDB:", e);
+      }
+    }
+
+    // Calculate risk score (0 to 100)
+    let riskScore = 0;
+    const flags: string[] = [];
+
+    if (ipData.proxy) {
+      riskScore += 45;
+      flags.push("Conexão detectada como Proxy ou VPN.");
+    }
+    if (ipData.hosting) {
+      riskScore += 30;
+      flags.push("IP pertencente a um Data Center/Hospedagem.");
+    }
+    
+    // Add 25 points per blacklist list
+    riskScore += blacklistedCount * 30;
+    if (blacklistedCount > 0) {
+      flags.push(`IP listado em ${blacklistedCount} blacklist(s) pública(s) de DNS.`);
+    }
+
+    if (abuseIpDbData) {
+      const score = abuseIpDbData.abuseConfidenceScore || 0;
+      // Blend score
+      riskScore = Math.round((riskScore + score) / 2);
+      if (score > 10) {
+        flags.push(`AbuseIPDB reporta nível de abuso de ${score}%.`);
+      }
+    }
+
+    // Cap risk score at 100
+    riskScore = Math.min(riskScore, 100);
+
+    // Determine threat level
+    let threatLevel: "low" | "medium" | "high" | "critical" = "low";
+    if (riskScore >= 75) {
+      threatLevel = "critical";
+    } else if (riskScore >= 45) {
+      threatLevel = "high";
+    } else if (riskScore >= 20) {
+      threatLevel = "medium";
+    }
+
+    res.json({
+      success: true,
+      ip: clientIp,
+      isp: ipData.isp || "Desconhecido",
+      country: ipData.country || "Desconhecido",
+      countryCode: ipData.countryCode || "BR",
+      city: ipData.city || "Desconhecido",
+      isProxy: !!ipData.proxy,
+      isHosting: !!ipData.hosting,
+      dnsbl: {
+        results: dnsblResults,
+        listedCount: blacklistedCount
+      },
+      abuseReport: abuseIpDbData ? {
+        abuseConfidenceScore: abuseIpDbData.abuseConfidenceScore,
+        totalReports: abuseIpDbData.totalReports,
+        lastReportedAt: abuseIpDbData.lastReportedAt
+      } : null,
+      riskScore,
+      threatLevel,
+      flags,
+      checkedAt: new Date().toISOString()
+    });
+  } catch (error: any) {
+    console.error("Erro no IP reputation:", error);
+    res.status(500).json({ error: error.message || "Erro interno ao processar IP Reputation." });
+  }
 });
 
 // 2. API: Extract OCR from Screenshot
