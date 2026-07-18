@@ -172,6 +172,11 @@ ${JSON.stringify(userAnswers, null, 2)}
 Suas diretrizes fundamentais:
 - Nunca invente diagnósticos. Use estritamente as evidências fornecidas.
 - Se os testes estiverem normais e o screenshot não apontar erro claro, seja transparente e diga que os parâmetros locais parecem saudáveis e que o problema pode ser temporário na infraestrutura do IMVU ou uma lentidão externa.
+- **Caso Especial**: Se o usuário relatar que o IMVU funciona APENAS com VPN/WARP neste celular, mas em outros celulares da mesma casa/Wi-Fi funciona NORMALMENTE sem VPN, explique isso de forma dedicada em uma das hipóteses. Explique os motivos técnicos:
+  1. **Bloqueio de IP por Reputação do Dispositivo / Firewall do IMVU (Cloudflare/Akamai)**: O IP público da rede pode ser dinâmico ou compartilhado (CGNAT), mas este dispositivo específico foi marcado/bloqueado temporariamente no firewall do IMVU (por excesso de tentativas de login falhas, cookies salvos corrompidos, ou assinaturas de conexão). O WARP altera o IP e desvia desse bloqueio local de reputação.
+  2. **Cache de DNS Local ou "DNS Privado" Ativo**: Este celular específico pode ter um DNS configurado incorretamente nas propriedades de rede ou um "DNS Privado" ativo (como AdGuard ou filtros de bloqueio) que impede a conexão ao domínio do IMVU. O WARP resolve isso ao injetar seu próprio DNS criptografado limpo.
+  3. **Problemas com o Android System WebView ou Certificados SSL/TLS**: Algumas versões de celular possuem certificados de segurança expirados ou WebView corrompido, e o túnel VPN ajuda a empacotar os dados burlando falhas locais de handshakes.
+  4. **Bloqueio de MAC no Roteador**: O roteador Wi-Fi pode ter regras de controle parental ou firewall de segurança bloqueando especificamente o endereço físico (MAC) deste aparelho.
 - Mostre o nível de confiança (Alta, Média, Baixa) para cada hipótese de problema levantado.
 - Explique de forma clara e profissional as limitações técnicas deste diagnóstico (por exemplo, limitações do sandbox do navegador em testar portas UDP de jogos ou traçar rotas traceroute completas).
 - Use linguagem acessível mas com terminologia técnica precisa, fornecendo recomendações realistas de resolução para cada hipótese.

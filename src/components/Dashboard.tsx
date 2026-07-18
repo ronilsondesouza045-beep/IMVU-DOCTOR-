@@ -257,6 +257,54 @@ export default function Dashboard({
                 </div>
               </div>
 
+              {/* Explaining 'Why only on this phone and not others?' */}
+              <div className="p-4 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-xl border border-indigo-500/20 space-y-3">
+                <span className="font-extrabold text-indigo-600 dark:text-indigo-400 block uppercase tracking-wider text-[11px] flex items-center">
+                  🤔 CASO INTRIGANTE: Por que no celular dele dá erro, mas em OUTROS celulares na mesma casa entra normal?
+                </span>
+                <p className="text-xs text-slate-650 dark:text-slate-300 leading-relaxed">
+                  Isso é muito comum e faz parecer que o celular está "quebrado", mas na verdade existem <strong>motivos técnicos de rede e segurança</strong> bem claros para isso acontecer:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div className="bg-white/40 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-200/40 dark:border-slate-800/40 space-y-1">
+                    <span className="font-extrabold text-indigo-600 dark:text-indigo-400">1. Bloqueio de Segurança Temporário (IP/ID)</span>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                      O sistema de segurança do IMVU (gerido pelo Cloudflare) pode ter bloqueado temporariamente as credenciais, o ID do dispositivo ou a sessão específica do celular dele (por exemplo, após errar a senha algumas vezes, ou devido a cookies travados que fazem requisições em excesso). O WARP desvia essa reputação negativa trocando a identidade da conexão.
+                    </p>
+                  </div>
+
+                  <div className="bg-white/40 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-200/40 dark:border-slate-800/40 space-y-1">
+                    <span className="font-extrabold text-indigo-600 dark:text-indigo-400">2. DNS Privado ou Filtro de Ads no Celular</span>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                      Este telefone em específico pode ter alguma configuração de "DNS Privado" ativada nas configurações do Android (como <code>dns.adguard.com</code>) ou aplicativos bloqueadores de anúncios instalados. Isso faz com que os domínios de imagem e login do IMVU sejam rejeitados pelo próprio aparelho, enquanto outros aparelhos na casa não têm essa barreira.
+                    </p>
+                  </div>
+
+                  <div className="bg-white/40 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-200/40 dark:border-slate-800/40 space-y-1">
+                    <span className="font-extrabold text-indigo-600 dark:text-indigo-400">3. Conflito de Endereço MAC ou Roteador</span>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                      Alguns roteadores de internet possuem firewall inteligente ou sistemas de controle dos pais ativos que bloqueiam canais de jogos de forma silenciosa para aparelhos específicos com base em seus endereços físicos (MAC Address).
+                    </p>
+                  </div>
+
+                  <div className="bg-white/40 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-200/40 dark:border-slate-800/40 space-y-1">
+                    <span className="font-extrabold text-indigo-600 dark:text-indigo-400">4. Falha no WebView do Sistema Android</span>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                      O IMVU carrega telas e autenticação através do "Android System WebView" (navegador interno do celular). Se ele estiver desatualizado ou corrompido neste aparelho específico, o jogo não consegue carregar a tela de login. O WARP força novos túneis que podem driblar travamentos de certificados de SSL antigos dessa ferramenta.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-xs">
+                  <p className="font-bold text-indigo-600 dark:text-indigo-400">💡 O que ele pode fazer para tentar resolver de vez sem precisar do WARP?</p>
+                  <ol className="list-decimal pl-4 mt-1.5 space-y-1 text-slate-600 dark:text-slate-400 text-[11px]">
+                    <li><strong>Desativar DNS Privado:</strong> Vá em Ajustes do celular &gt; Rede e Internet &gt; DNS Privado &gt; Mude de automático/manual para <strong>Desativado</strong>.</li>
+                    <li><strong>Atualizar o Android System WebView:</strong> Procure por "Android System WebView" na Google Play Store e clique em Atualizar se houver atualização disponível.</li>
+                    <li><strong>Limpar totalmente os Dados do App:</strong> Não apenas o cache! Vá em Ajustes &gt; Aplicativos &gt; IMVU &gt; Armazenamento &gt; <strong>Limpar Dados (Limpar Armazenamento)</strong>. Isso desloga qualquer conta e apaga arquivos de reputação ruins que podem estar travando as requisições.</li>
+                  </ol>
+                </div>
+              </div>
+
               {/* Actionable Manual Guide */}
               <div className="space-y-4">
                 <h4 className="font-bold text-slate-800 dark:text-slate-100 flex items-center text-xs uppercase tracking-wide">
