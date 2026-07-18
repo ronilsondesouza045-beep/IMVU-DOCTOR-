@@ -295,6 +295,95 @@ export default function Dashboard({
                   </div>
                 </div>
 
+                {/* ADVANCED: Room Disconnection and App Conflict Scan Helper */}
+                <div className="p-4 bg-red-500/5 dark:bg-red-500/10 rounded-xl border border-red-500/20 space-y-3">
+                  <span className="font-extrabold text-red-650 dark:text-red-400 block uppercase tracking-wider text-[11px] flex items-center">
+                    ⚠️ PROBLEMA COMPLEMENTAR: "Consigo Logar com VPN, mas dá Desconexão ao Entrar em Salas"
+                  </span>
+                  <p className="text-xs text-slate-650 dark:text-slate-300 leading-relaxed">
+                    Se o seu amigo consegue entrar no jogo com a VPN ligada, mas <strong>cai da sala de chat (desconexão imediata)</strong>, isso ocorre porque o login usa protocolo web simples (HTTP/TCP), enquanto a sala 3D exige conexões de pacotes de dados contínuos de alta velocidade (soquetes TCP/UDP persistentes). Se a VPN estiver lenta ou bloqueando essas portas, o jogo desconecta.
+                  </p>
+
+                  <div className="space-y-3 pt-1">
+                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs">1. Como configurar o WARP corretamente:</h5>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-2 border-l border-indigo-500">
+                      No aplicativo do <strong>WARP (1.1.1.1)</strong>, clique no menu de três linhas no canto superior e garanta que a opção selecionada seja <strong>"1.1.1.1 com WARP"</strong> e NÃO "Apenas 1.1.1.1". A opção "Apenas 1.1.1.1" muda apenas o DNS (o que ajuda no login), mas não cria o túnel seguro completo necessário para manter a conexão ativa nas salas 3D.
+                    </p>
+
+                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs">2. Outras VPNs Gratuitas mais robustas para Jogos (Sockets/UDP):</h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-lg border border-slate-200/50 dark:border-slate-800/40 flex flex-col justify-between">
+                        <div>
+                          <span className="font-bold text-indigo-500 block">ProtonVPN (Grátis & Sem Limite)</span>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                            A melhor alternativa gratuita para jogos. Ela cria um túnel criptografado completo que lida muito melhor com conexões persistentes de portas de chat do IMVU e não possui limite de dados mensal.
+                          </p>
+                        </div>
+                        <div className="flex gap-3 pt-2 mt-2 border-t border-slate-200/40 dark:border-slate-800/40">
+                          <a
+                            href="https://play.google.com/store/apps/details?id=ch.protonvpn.android"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-indigo-500 hover:underline"
+                          >
+                            <span>Android Play Store</span>
+                            <Zap className="w-2.5 h-2.5" />
+                          </a>
+                          <a
+                            href="https://apps.apple.com/app/proton-vpn-fast-secure/id1437005085"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-blue-500 hover:underline"
+                          >
+                            <span>iOS App Store</span>
+                            <Zap className="w-2.5 h-2.5" />
+                          </a>
+                        </div>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-lg border border-slate-200/50 dark:border-slate-800/40 flex flex-col justify-between">
+                        <div>
+                          <span className="font-bold text-blue-500 block">Windscribe VPN (Grátis 10GB/mês)</span>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                            Possui o protocolo <strong>"Stealth" (Furtivo)</strong> em suas configurações. Esse modo mascara a VPN como tráfego comum, impedindo que o firewall do IMVU derrube a conexão nas salas.
+                          </p>
+                        </div>
+                        <div className="flex gap-3 pt-2 mt-2 border-t border-slate-200/40 dark:border-slate-800/40">
+                          <a
+                            href="https://play.google.com/store/apps/details?id=com.windscribe.vpn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-indigo-500 hover:underline"
+                          >
+                            <span>Android Play Store</span>
+                            <Zap className="w-2.5 h-2.5" />
+                          </a>
+                          <a
+                            href="https://apps.apple.com/app/windscribe-vpn/id1129453758"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 text-[10px] font-bold text-blue-500 hover:underline"
+                          >
+                            <span>iOS App Store</span>
+                            <Zap className="w-2.5 h-2.5" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center">
+                      🔍 Varredura Manual: Aplicativos que causam conflito no celular
+                    </h5>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Não existem aplicativos automáticos confiáveis para escanear outros apps (muitos são vírus disfarçados). O seu amigo deve fazer uma <strong>varredura visual rápida</strong> na lista de aplicativos dele e verificar se possui algum dos seguintes instalados, pois eles bloqueiam as salas do IMVU:
+                    </p>
+                    <ul className="list-disc pl-5 text-[11px] text-slate-650 dark:text-slate-400 space-y-1">
+                      <li><strong>Bloqueadores de Anúncios / DNS:</strong> Aplicativos como <code>AdGuard</code>, <code>Blokada</code> ou <code>DNS Changer</code> agem como mini-VPNs locais e bloqueiam portas de servidores de imagens e avatares do IMVU, causando quedas constantes. Desative-os antes de jogar.</li>
+                      <li><strong>Antivírus e Segurança Ativa:</strong> Aplicativos como <code>Avast Mobile</code>, <code>Kaspersky Security</code> ou <code>McAfee</code> podem identificar falsos-positivos na conexão contínua da sala do IMVU e fechar a conexão abruptamente.</li>
+                      <li><strong>Aceleradores de Jogos / Game Boosters:</strong> Alguns aparelhos possuem ferramentas integradas para "otimizar bateria" que limitam o uso de dados em segundo plano ou derrubam conexões UDP de jogos pesados quando o telefone esquenta. Desative o modo de economia de energia.</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-xs">
                   <p className="font-bold text-indigo-600 dark:text-indigo-400">💡 O que ele pode fazer para tentar resolver de vez sem precisar do WARP?</p>
                   <ol className="list-decimal pl-4 mt-1.5 space-y-1 text-slate-600 dark:text-slate-400 text-[11px]">
