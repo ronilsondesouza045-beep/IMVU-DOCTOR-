@@ -222,6 +222,41 @@ export default function Dashboard({
                 </p>
               </div>
 
+              {/* Explaining the 'Why' behind WARP/VPN */}
+              <div className="p-4 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/20 space-y-3">
+                <span className="font-extrabold text-amber-600 dark:text-amber-400 block uppercase tracking-wider text-[11px] flex items-center">
+                  💡 ENTENDA O MOTIVO: Por que funciona com o app WARP/VPN mas não sem ele?
+                </span>
+                <p className="text-xs text-slate-650 dark:text-slate-300">
+                  A explicação é simples e envolve o <strong>caminho (rota)</strong> que os dados da sua internet percorrem até o jogo:
+                </p>
+                <div className="space-y-2 text-xs pl-2.5 border-l-2 border-indigo-500">
+                  <p>
+                    <strong>❌ Conexão DIRETA (Sem VPN/WARP):</strong> O sinal sai do celular do seu amigo, passa pelo provedor de internet dele (Claro, Vivo, Tim, ou fibra local) e tenta chegar direto aos servidores do IMVU. Se a rota do provedor estiver com problemas técnicos, congestionada, ou se o IMVU tiver bloqueado temporariamente o IP da internet dele (muito comum em redes compartilhadas - CGNAT), a conexão <strong>falha com erro de carregamento infinito ou erro de login</strong>.
+                  </p>
+                  <p>
+                    <strong>✅ Conexão INDIRETA (Com WARP ou VPN):</strong> O aplicativo do WARP cria uma "ponte" ou "desvio seguro". O celular dele envia os dados primeiro para um servidor de alta velocidade da Cloudflare. Como esse servidor tem caminhos excelentes e IPs limpos de altíssima reputação, ele busca as informações no IMVU sem qualquer bloqueio e envia de volta ao celular dele. É igual pegar um desvio livre de trânsito quando a avenida principal está interditada!
+                  </p>
+                </div>
+                
+                <div className="pt-2 border-t border-amber-500/10 space-y-2">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    🛠️ Tem como atualizar ou arrumar para entrar SEM o aplicativo no futuro?
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Sim! O seu amigo não conseguirá "atualizar o jogo" para arrumar isso porque o erro está na rede do provedor dele, mas ele pode forçar o provedor a limpar o sinal seguindo estas dicas:
+                  </p>
+                  <ul className="list-disc pl-5 text-xs text-slate-550 dark:text-slate-400 space-y-1">
+                    <li>
+                      <strong>Reiniciar o Roteador por 15 minutos:</strong> Desligar o modem/roteador de internet da tomada por 10 a 15 minutos de verdade. Isso obriga a central do provedor a desligar a sessão dele e entregar um <strong>IP público totalmente novo e limpo</strong> quando ligar de novo, o que costuma destravar o IMVU instantaneamente.
+                    </li>
+                    <li>
+                      <strong>Pedir a saída do CGNAT:</strong> Se a internet dele for de fibra pequena de bairro, ele pode ligar para o suporte e pedir para "tirarem ele do CGNAT" (IPv4 compartilhado) ou ativarem "IPv6 nativo".
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
               {/* Actionable Manual Guide */}
               <div className="space-y-4">
                 <h4 className="font-bold text-slate-800 dark:text-slate-100 flex items-center text-xs uppercase tracking-wide">
